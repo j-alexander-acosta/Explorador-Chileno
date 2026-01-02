@@ -112,8 +112,6 @@ Este proyecto está bajo la Licencia MIT. Ver [LICENSE](LICENSE) para más detal
 
 ## 👨‍💻 Autor
 
+**J. Alexander Acosta Z.**
+
 Desarrollado con ❤️ para los pequeños exploradores de Chile.
-
----
-
-**Powered by [Google Gemini AI](https://ai.google.dev/)**
