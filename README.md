@@ -1,21 +1,22 @@
 # 🌿 NaturIA Chile
 
-Aplicación web que identifica insectos y plantas de Chile usando Inteligencia Artificial.
+Aplicación web educativa que identifica la biodiversidad chilena usando Inteligencia Artificial (Google Gemini).
 
 ![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
 ![Flask](https://img.shields.io/badge/Flask-3.0+-green.svg)
 ![Gemini](https://img.shields.io/badge/Google-Gemini%20AI-orange.svg)
+![PWA](https://img.shields.io/badge/PWA-Ready-success.svg)
 
 ## 🎯 Características
 
-- 🐛 **Identificación de Insectos**: Sube una foto o busca por nombre
-- 🌿 **Identificación de Plantas**: Reconoce flora nativa de Chile
-- 🎤 **Búsqueda por Voz**: Usa el micrófono para buscar especies
-- 📷 **Análisis de Imágenes**: Identifica especies desde fotos
-- 🖼️ **Imágenes de Wikipedia**: Muestra fotos reales de las especies
-- 🎮 **Sistema de Puntos**: Gana puntos según la rareza de la especie
-- ⚠️ **Indicador de Peligrosidad**: Sabe si es seguro acercarse
-- 📱 **Diseño Responsive**: Funciona en móviles y tablets
+- 🐛 **Identificación Multiespecie**: Reconoce insectos, plantas, aves y animales silvestres nativos de Chile.
+- 🔊 **Canto y Sonidos**: Escucha los sonidos de aves e insectos (Integración con Xeno-Canto y Wikimedia).
+- 🗺️ **Mapa de Distribución**: Visualiza en qué regiones de Chile habita cada especie.
+- 🎤 **Búsqueda por Voz**: Usa el micrófono para buscar especies rápidamente.
+- 🎮 **Sistema de Puntos Premium**: Gana puntos por tus hallazgos. Incluye marcador global animado y persistente.
+- 🌙 **Modo Oscuro**: Diseño adaptable para una mejor visualización.
+- 📱 **PWA (Progressive Web App)**: Instálala en tu móvil para un acceso rápido y uso optimizado.
+- ⚠️ **Indicador de Peligrosidad**: Información clara sobre si la especie representa un riesgo.
 
 ## 🚀 Instalación
 
@@ -28,8 +29,8 @@ Aplicación web que identifica insectos y plantas de Chile usando Inteligencia A
 
 1. **Clona el repositorio**
    ```bash
-   git clone https://github.com/j-alexander-acosta/Explorador-Chileno.git
-   cd Explorador-Chileno
+   git clone https://github.com/j-alexander-acosta/NaturIA-Chile.git
+   cd NaturIA-Chile
    ```
 
 2. **Crea el entorno virtual**
@@ -56,7 +57,7 @@ Aplicación web que identifica insectos y plantas de Chile usando Inteligencia A
 
 6. **Abre en el navegador**
    ```
-   http://127.0.0.1:5000
+   http://127.0.0.1:5001
    ```
 
 ## 📁 Estructura del Proyecto
@@ -65,62 +66,40 @@ Aplicación web que identifica insectos y plantas de Chile usando Inteligencia A
 NaturIA-Chile/
 ├── static/
 │   ├── css/
-│   │   └── styles.css          # Estilos modernos
+│   │   └── styles.css          # Diseño moderno, animaciones y modo oscuro
 │   └── js/
-│       └── app.js              # Lógica del frontend
+│       └── app.js              # Lógica principal, PWA, Mapa y Sonidos
 ├── templates/
-│   └── index.html              # Interfaz principal
+│   └── index.html              # Interfaz de usuario (Jinja2)
 ├── utils/
-│   ├── __init__.py
-│   ├── gemini_client.py        # Cliente de Gemini AI
-│   └── image_search.py         # Búsqueda de imágenes Wikipedia
-├── .env.example                # Ejemplo de variables de entorno
-├── .gitignore
-├── app.py                      # Servidor Flask
-├── requirements.txt            # Dependencias
-└── README.md
+│   ├── gemini_client.py        # Integración con Google Gemini AI
+│   ├── sound_search.py         # Búsqueda de sonidos (Xeno-Canto/Wikimedia)
+│   └── image_search.py         # Cliente para imágenes de Wikipedia
+├── .env.example                # Plantilla de variables de entorno
+├── app.py                      # Servidor Flask y API Endpoints
+└── requirements.txt            # Dependencias del sistema
 ```
 
 ## 🔧 Tecnologías
 
-- **Backend**: Python + Flask
-- **Frontend**: HTML5, CSS3, JavaScript Vanilla
-- **IA**: Google Gemini Flash
-- **Imágenes**: Wikipedia API + Pillow
-- **Voz**: Web Speech API
-
-## 📝 Uso
-
-### Modo Foto
-1. Selecciona **Insectos** o **Plantas**
-2. Haz clic en **Subir Foto**
-3. Sube una imagen desde tu dispositivo
-4. Haz clic en **¡Analizar!**
-
-### Modo Búsqueda
-1. Selecciona **Insectos** o **Plantas**
-2. Haz clic en **Buscar por Nombre**
-3. Escribe el nombre o usa el 🎤 micrófono
-4. Haz clic en **¡Buscar!**
+- **IA**: Google Gemini 1.5 Flash / 2.0 Flash
+- **Backend**: Flask (Python)
+- **APIs**: Xeno-Canto (Sonidos), Wikimedia Commons (Imágenes/Audio)
+- **Frontend**: CSS Grid/Flexbox, Vanilla JS, Web Speech API
+- **Almacenamiento**: LocalStorage para historial y puntos
 
 ## 🤝 Contribuir
 
-Las contribuciones son bienvenidas. Por favor:
-
+Las contribuciones son bienvenidas:
 1. Haz fork del repositorio
-2. Crea una rama para tu feature (`git checkout -b feature/nueva-caracteristica`)
-3. Commit tus cambios (`git commit -m 'Agrega nueva característica'`)
-4. Push a la rama (`git push origin feature/nueva-caracteristica`)
+2. Crea una rama (`git checkout -b feature/nueva-mejora`)
+3. Haz commit de tus cambios (`git commit -m 'Añade nueva funcionalidad'`)
+4. Haz push a la rama (`git push origin feature/nueva-mejora`)
 5. Abre un Pull Request
 
 ## 📄 Licencia
 
-© 2026 NaturIA Chile. Todos los derechos reservados.
-
-## 👨‍💻 Autor
-
-**J. Alexander Acosta Z.**
+© 2026 NaturIA Chile. Todos los derechos reservados. Desarrollado por **J. Alexander Acosta Z.**
 
 ---
-
-*Desarrollado con 🌿 para los amantes de la naturaleza chilena.*
+*Desarrollado con 🌿 para los exploradores del mañana.*
