@@ -18,7 +18,9 @@ const state = {
     currentAudio: null,
     isPlaying: false,
     deferredPrompt: null, // Para PWA install prompt
-    totalPoints: 0
+    totalPoints: 0,
+    isLoggedIn: false,
+    user: null
 };
 
 // ========================================
@@ -108,7 +110,26 @@ const elements = {
     
     // Puntos Globales
     totalPointsBadge: document.getElementById('total-points-badge'),
-    pointsTotalValue: document.getElementById('points-total-value')
+    pointsTotalValue: document.getElementById('points-total-value'),
+    
+    // Usuario / Registro
+    userBtnToggle: document.getElementById('user-btn-toggle'),
+    userNameLabel: document.getElementById('user-name-label'),
+    userModal: document.getElementById('user-modal'),
+    userModalClose: document.getElementById('user-modal-close'),
+    viewAuth: document.getElementById('user-view-auth'),
+    viewProfile: document.getElementById('user-view-profile'),
+    authTabs: document.querySelectorAll('.auth-tab'),
+    authForms: document.querySelectorAll('.auth-form'),
+    loginForm: document.getElementById('login-form'),
+    registerForm: document.getElementById('register-form'),
+    logoutBtn: document.getElementById('logout-btn'),
+    // Perfil
+    profileFullName: document.getElementById('profile-full-name'),
+    profileEmail: document.getElementById('profile-email'),
+    profilePoints: document.getElementById('profile-points'),
+    profileDiscoveries: document.getElementById('profile-discoveries'),
+    profileRank: document.getElementById('profile-rank')
 };
 
 // ========================================
@@ -170,8 +191,10 @@ function init() {
     setupHistory();
     setupSoundPlayer();
     setupPWA();
+    setupAuthListeners();
     loadHistory();
     loadPoints();
+    checkSession();
     
     // Insertar mapa SVG
     if (elements.chileMap) {
@@ -618,6 +641,11 @@ function showResults(data) {
     
     // Animación de puntos del resultado
     animateResultPoints(puntosGanados);
+    
+    // Guardar descubrimiento si está logueado
+    if (state.isLoggedIn) {
+        saveDiscoveryToServer(data);
+    }
     
     // Mapa de distribución
     showDistributionMap(data.regiones || extractRegionsFromHabitat(data.habitat));
@@ -1086,6 +1114,23 @@ function updateTotalPoints(puntosNuevos) {
     
     // Animación numérica del total
     animateTotalValue(previousTotal, state.totalPoints);
+    
+    // Sincronizar con el servidor si está logueado
+    if (state.isLoggedIn) {
+        syncPointsWithServer(state.totalPoints);
+    }
+}
+
+async function syncPointsWithServer(points) {
+    try {
+        await fetch('/sincronizar_puntos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ puntos: points })
+        });
+    } catch (error) {
+        console.error('Error syncing points:', error);
+    }
 }
 
 function animateTotalValue(start, end) {
@@ -1105,6 +1150,31 @@ function animateTotalValue(start, end) {
             elements.pointsTotalValue.textContent = current;
         }
     }, stepTime);
+}
+
+async function saveDiscoveryToServer(data) {
+    try {
+        const response = await fetch('/guardar_descubrimiento', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                nombre: data.nombre,
+                cientifico: data.cientifico,
+                tipo: data.tipo,
+                imagen_url: data.imagen_url,
+                puntos: data.puntos
+            })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            console.log('Descubrimiento guardado:', result.mensaje);
+            state.user.descubrimientos_count = result.descubrimientos_count;
+            updateAuthUI();
+        }
+    } catch (error) {
+        console.error('Error saving discovery:', error);
+    }
 }
 
 // ========================================
@@ -1173,6 +1243,180 @@ function showSection(section) {
 }
 
 // ========================================
-// INICIAR APLICACIÓN
+// AUTENTICACIÓN Y REGISTRO
 // ========================================
+function setupAuthListeners() {
+    // Abrir/Cerrar Modal
+    elements.userBtnToggle.addEventListener('click', () => {
+        elements.userModal.classList.add('active');
+    });
+    
+    elements.userModalClose.addEventListener('click', () => {
+        elements.userModal.classList.remove('active');
+    });
+    
+    // Cerrar modal al hacer clic fuera
+    window.addEventListener('click', (e) => {
+        if (e.target === elements.userModal) {
+            elements.userModal.classList.remove('active');
+        }
+    });
+
+    // Cambiar entre Login y Registro
+    elements.authTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const targetTab = tab.getAttribute('data-tab');
+            
+            // UI de Tabs
+            elements.authTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            // UI de Forms
+            elements.authForms.forEach(f => {
+                f.classList.remove('active');
+                if (f.id === `${targetTab}-form`) {
+                    f.classList.add('active');
+                }
+            });
+        });
+    });
+
+    // Submit Login
+    elements.loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ correo: email })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                handleLoginSuccess(result);
+            } else {
+                alert(result.error || 'Error al iniciar sesión');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+        }
+    });
+
+    // Submit Registro
+    elements.registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = {
+            nombre: document.getElementById('reg-nombre').value,
+            apellido: document.getElementById('reg-apellido').value,
+            correo: document.getElementById('reg-email').value,
+            telefono: document.getElementById('reg-phone').value,
+            puntos: state.totalPoints // Enviar puntos actuales al registrarse
+        };
+        
+        try {
+            const response = await fetch('/registro', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                handleLoginSuccess(result);
+            } else {
+                alert(result.error || 'Error al registrarse');
+            }
+        } catch (error) {
+            console.error('Register error:', error);
+        }
+    });
+
+    // Logout
+    elements.logoutBtn.addEventListener('click', async () => {
+        try {
+            await fetch('/logout');
+            state.isLoggedIn = false;
+            state.user = null;
+            updateAuthUI();
+            elements.userModal.classList.remove('active');
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    });
+}
+
+async function checkSession() {
+    try {
+        const response = await fetch('/perfil');
+        if (response.ok) {
+            const result = await response.json();
+            state.isLoggedIn = true;
+            state.user = result;
+            updateAuthUI();
+            
+            // Sincronizar puntos (prioridad a los del servidor)
+            if (result.puntos > state.totalPoints) {
+                state.totalPoints = result.puntos;
+                elements.pointsTotalValue.textContent = state.totalPoints;
+                localStorage.setItem('naturia-total-points', state.totalPoints);
+            }
+        }
+    } catch (error) {
+        // No logueado, ignorar
+    }
+}
+
+function handleLoginSuccess(result) {
+    state.isLoggedIn = true;
+    state.user = result.usuario;
+    updateAuthUI();
+    
+    // Si el servidor devolvió puntos, actualizar local
+    if (result.usuario.puntos) {
+        state.totalPoints = result.usuario.puntos;
+        elements.pointsTotalValue.textContent = state.totalPoints;
+        localStorage.setItem('naturia-total-points', state.totalPoints);
+    }
+    
+    alert(result.mensaje);
+    elements.userModal.classList.remove('active');
+}
+
+function updateAuthUI() {
+    if (state.isLoggedIn) {
+        elements.userNameLabel.textContent = state.user.nombre;
+        elements.userBtnToggle.classList.add('logged-in');
+        
+        // Swappear vistas en modal
+        elements.viewAuth.style.display = 'none';
+        elements.viewProfile.style.display = 'block';
+        
+        // Llenar datos de perfil
+        elements.profileFullName.textContent = `${state.user.nombre} ${state.user.apellido || ''}`;
+        elements.profileEmail.textContent = state.user.correo;
+        elements.profilePoints.textContent = state.totalPoints;
+        elements.profileDiscoveries.textContent = state.user.descubrimientos_count || 0;
+        
+        // Calcular Rango
+        elements.profileRank.textContent = getExplorerRank(state.totalPoints);
+    } else {
+        elements.userNameLabel.textContent = 'Ingresar';
+        elements.userBtnToggle.classList.remove('logged-in');
+        
+        elements.viewAuth.style.display = 'block';
+        elements.viewProfile.style.display = 'none';
+    }
+}
+
+function getExplorerRank(points) {
+    if (points < 500) return 'Explorador Novato 🌿';
+    if (points < 1500) return 'Rastreador de Huellas 🐾';
+    if (points < 3000) return 'Observador Senior 🔭';
+    if (points < 6000) return 'Guardián del Bosque 🌲';
+    return 'Maestro de la Naturaleza 👑';
+}
 document.addEventListener('DOMContentLoaded', init);

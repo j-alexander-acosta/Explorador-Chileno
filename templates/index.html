@@ -30,6 +30,12 @@
         <span class="icon-sun">☀️</span>
     </button>
     
+    <!-- Botón de Usuario -->
+    <button class="user-btn" id="user-btn-toggle" title="Mi Perfil">
+        <span class="user-icon">👤</span>
+        <span class="user-name-label" id="user-name-label">Ingresar</span>
+    </button>
+    
     <div class="container">
         <!-- Header -->
         <header class="header">
@@ -278,6 +284,77 @@
         <div class="pwa-install-actions">
             <button class="pwa-install-btn primary" id="pwa-install-accept">Instalar</button>
             <button class="pwa-install-btn secondary" id="pwa-install-dismiss">Ahora no</button>
+        </div>
+    </div>
+    
+    <!-- Modal de Registro / Login -->
+    <div class="user-modal" id="user-modal">
+        <div class="user-modal-content">
+            <button class="user-modal-close" id="user-modal-close">&times;</button>
+            
+            <div id="user-view-auth">
+                <div class="user-modal-tabs">
+                    <button class="auth-tab active" data-tab="login">Entrar</button>
+                    <button class="auth-tab" data-tab="register">Registrarse</button>
+                </div>
+                
+                <!-- Formulario Login -->
+                <form id="login-form" class="auth-form active">
+                    <h3>¡Hola de nuevo!</h3>
+                    <p>Ingresa tu correo para recuperar tu progreso.</p>
+                    <div class="form-group">
+                        <label for="login-email">Correo Electrónico</label>
+                        <input type="email" id="login-email" required placeholder="ejemplo@correo.com">
+                    </div>
+                    <button type="submit" class="auth-submit-btn">Entrar</button>
+                </form>
+                
+                <!-- Formulario Registro -->
+                <form id="register-form" class="auth-form">
+                    <h3>Crea tu Perfil</h3>
+                    <p>¡Guarda tus descubrimientos y gana puntos!</p>
+                    <div class="form-group">
+                        <label for="reg-nombre">Nombre</label>
+                        <input type="text" id="reg-nombre" required placeholder="Tu nombre">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-apellido">Apellido</label>
+                        <input type="text" id="reg-apellido" required placeholder="Tu apellido">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-email">Correo Electrónico</label>
+                        <input type="email" id="reg-email" required placeholder="tu@correo.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-phone">Teléfono (Opcional)</label>
+                        <input type="tel" id="reg-phone" placeholder="+56 9 ...">
+                    </div>
+                    <button type="submit" class="auth-submit-btn">Crear Perfil</button>
+                </form>
+            </div>
+            
+            <!-- Vista de Perfil Logueado -->
+            <div id="user-view-profile" style="display: none;">
+                <div class="profile-header">
+                    <div class="profile-avatar">👤</div>
+                    <h2 id="profile-full-name">Nombre de Usuario</h2>
+                    <p id="profile-email">correo@ejemplo.com</p>
+                    <div class="profile-rank" id="profile-rank">Explorador Novato</div>
+                </div>
+                
+                <div class="profile-stats">
+                    <div class="stat-card">
+                        <span class="stat-value" id="profile-points">0</span>
+                        <span class="stat-label">Puntos</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="profile-discoveries">0</span>
+                        <span class="stat-label">Hallazgos</span>
+                    </div>
+                </div>
+                
+                <button id="logout-btn" class="logout-btn">Cerrar Sesión</button>
+            </div>
         </div>
     </div>
     

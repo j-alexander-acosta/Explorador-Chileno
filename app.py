@@ -4,7 +4,10 @@ NaturIA Chile - Identifica insectos y plantas de Chile con IA
 """
 
 import os
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from datetime import datetime
 from dotenv import load_dotenv
 from utils.gemini_client import analizar_imagen, buscar_por_texto
 from utils.image_search import obtener_imagen_especie
@@ -17,8 +20,189 @@ load_dotenv()
 app = Flask(__name__)
 
 # Configuración
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'naturia-chile-super-secret-key')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Límite de 16MB para uploads
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///naturia.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+login_manager = LoginManager(app)
+login_manager.login_view = 'index'
+
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+
+# ========================================
+# MODELOS DE BASE DE DATOS
+# ========================================
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(50), nullable=False)
+    apellido = db.Column(db.String(50), nullable=False)
+    correo = db.Column(db.String(100), unique=True, nullable=False)
+    telefono = db.Column(db.String(20), nullable=True)
+    total_puntos = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relación con descubrimientos
+    discoveries = db.relationship('Discovery', backref='explorer', lazy=True)
+
+class Discovery(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    nombre_especie = db.Column(db.String(100), nullable=False)
+    nombre_cientifico = db.Column(db.String(100), nullable=False)
+    tipo = db.Column(db.String(50), nullable=False)
+    imagen_url = db.Column(db.String(255), nullable=True)
+    puntos = db.Column(db.Integer, default=0)
+    fecha = db.Column(db.DateTime, default=datetime.utcnow)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+# Crear tablas
+with app.app_context():
+    db.create_all()
+
+# ========================================
+# RUTAS DE AUTENTICACIÓN
+# ========================================
+
+@app.route('/registro', methods=['POST'])
+def registro():
+    """Registro de nuevo usuario."""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No se recibieron datos'}), 400
+        
+        # Validar campos requeridos
+        required = ['nombre', 'apellido', 'correo']
+        for field in required:
+            if not data.get(field):
+                return jsonify({'error': f'El campo {field} es obligatorio'}), 400
+        
+        # Verificar si ya existe el correo
+        if User.query.filter_by(correo=data['correo']).first():
+            return jsonify({'error': 'Este correo ya está registrado'}), 400
+        
+        # Crear usuario
+        nuevo_usuario = User(
+            nombre=data['nombre'],
+            apellido=data['apellido'],
+            correo=data['correo'],
+            telefono=data.get('telefono', ''),
+            total_puntos=int(data.get('puntos', 0)) # Sincronizar puntos iniciales si existen
+        )
+        
+        db.session.add(nuevo_usuario)
+        db.session.commit()
+        
+        login_user(nuevo_usuario)
+        
+        return jsonify({
+            'success': True,
+            'mensaje': f'¡Bienvenido, {nuevo_usuario.nombre}!',
+            'usuario': {
+                'nombre': nuevo_usuario.nombre,
+                'puntos': nuevo_usuario.total_puntos
+            }
+        }), 201
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/login', methods=['POST'])
+def login():
+    """Inicio de sesión simple por correo."""
+    try:
+        data = request.get_json()
+        correo = data.get('correo')
+        
+        if not correo:
+            return jsonify({'error': 'Se requiere el correo electrónico'}), 400
+            
+        usuario = User.query.filter_by(correo=correo).first()
+        if not usuario:
+            return jsonify({'error': 'Correo no encontrado. ¡Regístrate para comenzar!'}), 404
+            
+        login_user(usuario)
+        
+        return jsonify({
+            'success': True,
+            'mensaje': f'Hola de nuevo, {usuario.nombre}',
+            'usuario': {
+                'nombre': usuario.nombre,
+                'puntos': usuario.total_puntos
+            }
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/perfil', methods=['GET'])
+@login_required
+def obtener_perfil():
+    """Obtiene los datos del perfil y descubrimientos."""
+    # En el futuro, aquí se consultarán los descubrimientos de la DB
+    return jsonify({
+        'nombre': current_user.nombre,
+        'apellido': current_user.apellido,
+        'correo': current_user.correo,
+        'puntos': current_user.total_puntos,
+        'descubrimientos_count': Discovery.query.filter_by(user_id=current_user.id).count()
+    })
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return jsonify({'success': True, 'mensaje': 'Sesión cerrada'})
+
+# Actualizar puntos en la DB
+@app.route('/sincronizar_puntos', methods=['POST'])
+@login_required
+def sincronizar_puntos():
+    try:
+        data = request.get_json()
+        puntos = data.get('puntos')
+        if puntos is not None:
+            current_user.total_puntos = int(puntos)
+            db.session.commit()
+            return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/guardar_descubrimiento', methods=['POST'])
+@login_required
+def guardar_descubrimiento():
+    """Guarda un nuevo descubrimiento en la base de datos."""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No se recibieron datos'}), 400
+            
+        nuevo_descubrimiento = Discovery(
+            user_id=current_user.id,
+            nombre_especie=data.get('nombre'),
+            nombre_cientifico=data.get('cientifico'),
+            tipo=data.get('tipo'),
+            imagen_url=data.get('imagen_url'),
+            puntos=int(data.get('puntos', 0))
+        )
+        
+        db.session.add(nuevo_descubrimiento)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'mensaje': '¡Descubrimiento guardado en tu Naturadex!',
+            'descubrimientos_count': Discovery.query.filter_by(user_id=current_user.id).count()
+        }), 201
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 def allowed_file(filename):
     """Verifica si la extensión del archivo es permitida."""
