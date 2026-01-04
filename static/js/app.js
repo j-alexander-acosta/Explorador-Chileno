@@ -30,6 +30,8 @@ const elements = {
     // Botones de tipo
     btnInsecto: document.getElementById('btn-insecto'),
     btnPlanta: document.getElementById('btn-planta'),
+    btnAve: document.getElementById('btn-ave'),
+    btnAnimal: document.getElementById('btn-animal'),
     
     // Botones de modo
     modeFoto: document.getElementById('mode-foto'),
@@ -218,6 +220,8 @@ function disableDarkMode() {
 function setupTypeSelector() {
     elements.btnInsecto.addEventListener('click', () => selectType('insecto'));
     elements.btnPlanta.addEventListener('click', () => selectType('planta'));
+    elements.btnAve.addEventListener('click', () => selectType('ave'));
+    elements.btnAnimal.addEventListener('click', () => selectType('animal'));
 }
 
 function selectType(type) {
@@ -225,16 +229,30 @@ function selectType(type) {
     
     elements.btnInsecto.classList.toggle('active', type === 'insecto');
     elements.btnPlanta.classList.toggle('active', type === 'planta');
+    elements.btnAve.classList.toggle('active', type === 'ave');
+    elements.btnAnimal.classList.toggle('active', type === 'animal');
     
     const uploadIcon = elements.uploadZone.querySelector('.upload-icon');
     if (uploadIcon) {
-        uploadIcon.textContent = type === 'insecto' ? '🐛' : '🌿';
+        switch(type) {
+            case 'insecto': uploadIcon.textContent = '🐛'; break;
+            case 'planta': uploadIcon.textContent = '🌿'; break;
+            case 'ave': uploadIcon.textContent = '🐦'; break;
+            case 'animal': uploadIcon.textContent = '🦊'; break;
+        }
     }
     
     if (elements.searchInput) {
-        elements.searchInput.placeholder = type === 'insecto' 
-            ? 'Ej: Chinita, Abejorro, Madre de culebra...'
-            : 'Ej: Copihue, Araucaria, Nalca...';
+        switch(type) {
+            case 'insecto': 
+                elements.searchInput.placeholder = 'Ej: Chinita, Abejorro, Madre de culebra...'; break;
+            case 'planta': 
+                elements.searchInput.placeholder = 'Ej: Copihue, Araucaria, Nalca...'; break;
+            case 'ave': 
+                elements.searchInput.placeholder = 'Ej: Chincol, Cóndor, Sietecolores...'; break;
+            case 'animal': 
+                elements.searchInput.placeholder = 'Ej: Puma, Pudú, Zorro culpeo...'; break;
+        }
     }
 }
 
@@ -526,7 +544,12 @@ async function analyzeImage() {
 // ========================================
 function showResults(data) {
     // Ícono según tipo
-    elements.resultIcon.textContent = data.tipo === 'planta' ? '🌿' : '🐛';
+    switch(data.tipo) {
+        case 'planta': elements.resultIcon.textContent = '🌿'; break;
+        case 'ave': elements.resultIcon.textContent = '🐦'; break;
+        case 'animal': elements.resultIcon.textContent = '🦊'; break;
+        default: elements.resultIcon.textContent = '🐛';
+    }
     
     // Imagen de la especie
     if (data.imagen_url && elements.resultImageContainer && elements.resultSpeciesImage) {

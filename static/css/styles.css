@@ -184,6 +184,16 @@ body::before {
     background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-light) 100%);
 }
 
+.type-btn.active.ave {
+    border-color: var(--color-info);
+    background: linear-gradient(135deg, var(--color-info) 0%, #42A5F5 100%);
+}
+
+.type-btn.active.animal {
+    border-color: #A0522D; /* Sienna */
+    background: linear-gradient(135deg, #A0522D 0%, #CD853F 100%);
+}
+
 .type-btn-icon {
     font-size: 1.5rem;
 }

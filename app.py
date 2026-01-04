@@ -60,9 +60,9 @@ def analizar():
                 'error': '¡Ups! Solo acepto imágenes (PNG, JPG, GIF o WEBP).'
             }), 400
         
-        # Obtener el tipo de análisis (insecto o planta)
+        # Obtener el tipo de análisis (insecto, planta, ave o animal)
         tipo = request.form.get('tipo', 'insecto')
-        if tipo not in ['insecto', 'planta']:
+        if tipo not in ['insecto', 'planta', 'ave', 'animal']:
             tipo = 'insecto'
         
         # Leer los bytes de la imagen
@@ -115,7 +115,7 @@ def buscar():
                 'error': '¡Escribe o di el nombre de lo que quieres buscar!'
             }), 400
         
-        if tipo not in ['insecto', 'planta']:
+        if tipo not in ['insecto', 'planta', 'ave', 'animal']:
             tipo = 'insecto'
         
         # Buscar con Gemini
@@ -194,4 +194,5 @@ if __name__ == '__main__':
         print("   Crea un archivo .env con tu API key de Google Gemini")
     
     # Ejecutar en modo debug para desarrollo
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5001))
+    app.run(debug=True, host='0.0.0.0', port=port)

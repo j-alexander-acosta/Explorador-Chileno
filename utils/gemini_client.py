@@ -47,6 +47,40 @@ def obtener_prompt(tipo: str) -> str:
         {"error": "No pude identificar un insecto en esta imagen. ¡Intenta con otra foto!"}
         
         IMPORTANTE: Responde SOLO con el JSON, sin texto adicional ni markdown."""
+    elif tipo == "ave":
+        return """Eres un experto ornitólogo chileno especializado en aves de Chile.
+        Analiza la imagen y devuelve ÚNICAMENTE un objeto JSON válido con esta estructura exacta:
+        {
+            "nombre": "Nombre común en Chile",
+            "cientifico": "Nombre científico en latín",
+            "descripcion": "Explicación divertida y educativa para niños de 8 años, máximo 3 oraciones",
+            "habitat": "Dónde vive en Chile (regiones o zonas)",
+            "peligrosidad": "Baja/Media/Alta",
+            "dato_curioso": "Un dato sorprendente sobre esta ave",
+            "puntos": un número entero entre 10 y 100 basado en la rareza del ave en Chile
+        }
+        
+        Si no puedes identificar un ave en la imagen, devuelve:
+        {"error": "No pude identificar un ave en esta imagen. ¡Intenta con otra foto!"}
+        
+        IMPORTANTE: Responde SOLO con el JSON, sin texto adicional ni markdown."""
+    elif tipo == "animal":
+        return """Eres un experto zoólogo chileno especializado en fauna silvestre de Chile (mamíferos, reptiles, etc.).
+        Analiza la imagen y devuelve ÚNICAMENTE un objeto JSON válido con esta estructura exacta:
+        {
+            "nombre": "Nombre común en Chile",
+            "cientifico": "Nombre científico en latín",
+            "descripcion": "Explicación divertida y educativa para niños de 8 años, máximo 3 oraciones",
+            "habitat": "Dónde vive en Chile (regiones o zonas)",
+            "peligrosidad": "Baja/Media/Alta",
+            "dato_curioso": "Un dato sorprendente sobre este animal",
+            "puntos": un número entero entre 10 y 100 basado en la rareza del animal en Chile
+        }
+        
+        Si no puedes identificar un animal silvestre chileno en la imagen, devuelve:
+        {"error": "No pude identificar un animal silvestre chileno en esta imagen. ¡Intenta con otra foto!"}
+        
+        IMPORTANTE: Responde SOLO con el JSON, sin texto adicional ni markdown."""
     else:
         return """Eres un experto botánico chileno especializado en flora nativa de Chile.
         Analiza la imagen y devuelve ÚNICAMENTE un objeto JSON válido con esta estructura exacta:
@@ -191,6 +225,46 @@ def obtener_prompt_busqueda(tipo: str, consulta: str) -> str:
         {{"error": "No encontré información sobre '{consulta}'. ¿Puedes verificar el nombre?"}}
         
         IMPORTANTE: Responde SOLO con el JSON, sin texto adicional ni markdown."""
+    elif tipo == "ave":
+        return f"""Eres un experto ornitólogo chileno especializado en aves de Chile.
+        El usuario está buscando información sobre: "{consulta}"
+        
+        Identifica el ave y devuelve ÚNICAMENTE un objeto JSON válido con esta estructura exacta:
+        {{
+            "nombre": "Nombre común en Chile",
+            "cientifico": "Nombre científico en latín",
+            "descripcion": "Explicación divertida y educativa para niños de 8 años, máximo 3 oraciones",
+            "habitat": "Dónde vive en Chile (regiones o zonas)",
+            "peligrosidad": "Baja/Media/Alta",
+            "dato_curioso": "Un dato sorprendente sobre esta ave",
+            "puntos": un número entero entre 10 y 100 basado en la rareza del ave en Chile,
+            "imagen_sugerida": "Una descripción breve para buscar una imagen del ave"
+        }}
+        
+        Si no puedes identificar el ave o no existe en Chile, devuelve:
+        {{"error": "No encontré información sobre '{consulta}' en Chile. ¿Puedes verificar el nombre?"}}
+        
+        IMPORTANTE: Responde SOLO con el JSON, sin texto adicional ni markdown."""
+    elif tipo == "animal":
+        return f"""Eres un experto zoólogo chileno especializado en fauna silvestre de Chile.
+        El usuario está buscando información sobre: "{consulta}"
+        
+        Identifica el animal y devuelve ÚNICAMENTE un objeto JSON válido con esta estructura exacta:
+        {{
+            "nombre": "Nombre común en Chile",
+            "cientifico": "Nombre científico en latín",
+            "descripcion": "Explicación divertida y educativa para niños de 8 años, máximo 3 oraciones",
+            "habitat": "Dónde vive en Chile (regiones o zonas)",
+            "peligrosidad": "Baja/Media/Alta",
+            "dato_curioso": "Un dato sorprendente sobre este animal",
+            "puntos": un número entero entre 10 y 100 basado en la rareza del animal en Chile,
+            "imagen_sugerida": "Una descripción breve para buscar una imagen del animal"
+        }}
+        
+        Si no puedes identificar el animal o no existe en Chile, devuelve:
+        {{"error": "No encontré información sobre '{consulta}' en Chile. ¿Puedes verificar el nombre?"}}
+        
+        IMPORTANTE: Responde SOLO con el JSON, sin texto adicional ni markdown."""
     else:
         return f"""Eres un experto botánico chileno especializado en flora nativa de Chile.
         El usuario está buscando información sobre: "{consulta}"
@@ -207,8 +281,8 @@ def obtener_prompt_busqueda(tipo: str, consulta: str) -> str:
             "imagen_sugerida": "Una descripción breve para buscar una imagen de la planta"
         }}
         
-        Si no puedes identificar la planta o no existe, devuelve:
-        {{"error": "No encontré información sobre '{consulta}'. ¿Puedes verificar el nombre?"}}
+        Si no puedes identificar la planta o no existe en Chile, devuelve:
+        {{"error": "No encontré información sobre '{consulta}' en Chile. ¿Puedes verificar el nombre?"}}
         
         IMPORTANTE: Responde SOLO con el JSON, sin texto adicional ni markdown."""
 

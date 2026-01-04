@@ -304,7 +304,7 @@ def buscar_sonido(nombre_especie, nombre_cientifico=None, tipo='insecto'):
     Args:
         nombre_especie: Nombre común de la especie
         nombre_cientifico: Nombre científico (opcional)
-        tipo: 'insecto' o 'planta' (las plantas no tienen sonido)
+        tipo: 'insecto', 'planta', 'ave' o 'animal'
     
     Returns:
         dict con información del sonido o None
@@ -313,14 +313,20 @@ def buscar_sonido(nombre_especie, nombre_cientifico=None, tipo='insecto'):
     if tipo == 'planta':
         return None
     
-    # Primero intentar con aves (Xeno-Canto)
-    resultado = buscar_sonido_ave(nombre_especie, nombre_cientifico)
+    # Si es ave, usar Xeno-Canto con fallback a Wikimedia
+    if tipo == 'ave':
+        return buscar_sonido_ave(nombre_especie, nombre_cientifico)
     
-    if resultado:
-        return resultado
+    # Si es animal, usar directamente Wikimedia como fallback
+    if tipo == 'animal':
+        return buscar_en_wikimedia(nombre_cientifico if nombre_cientifico else nombre_especie)
     
-    # Si no es ave, buscar en insectos locales
-    return buscar_sonido_insecto(nombre_especie)
+    # Si es insecto, primero intentar local, luego Wikimedia
+    resultado_local = buscar_sonido_insecto(nombre_especie)
+    if resultado_local:
+        return resultado_local
+        
+    return buscar_en_wikimedia(nombre_cientifico if nombre_cientifico else nombre_especie)
 
 
 # Para pruebas
