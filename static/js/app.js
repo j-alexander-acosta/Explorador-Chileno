@@ -17,7 +17,8 @@ const state = {
     historyOpen: false,
     currentAudio: null,
     isPlaying: false,
-    deferredPrompt: null // Para PWA install prompt
+    deferredPrompt: null, // Para PWA install prompt
+    totalPoints: 0
 };
 
 // ========================================
@@ -103,7 +104,11 @@ const elements = {
     // PWA
     pwaInstallBanner: document.getElementById('pwa-install-banner'),
     pwaInstallAccept: document.getElementById('pwa-install-accept'),
-    pwaInstallDismiss: document.getElementById('pwa-install-dismiss')
+    pwaInstallDismiss: document.getElementById('pwa-install-dismiss'),
+    
+    // Puntos Globales
+    totalPointsBadge: document.getElementById('total-points-badge'),
+    pointsTotalValue: document.getElementById('points-total-value')
 };
 
 // ========================================
@@ -166,10 +171,21 @@ function init() {
     setupSoundPlayer();
     setupPWA();
     loadHistory();
+    loadPoints();
     
     // Insertar mapa SVG
     if (elements.chileMap) {
         elements.chileMap.innerHTML = CHILE_MAP_SVG;
+    }
+}
+
+function loadPoints() {
+    const savedPoints = localStorage.getItem('naturia-total-points');
+    if (savedPoints) {
+        state.totalPoints = parseInt(savedPoints);
+        if (elements.pointsTotalValue) {
+            elements.pointsTotalValue.textContent = state.totalPoints;
+        }
     }
 }
 
@@ -594,9 +610,14 @@ function showResults(data) {
     elements.resultDanger.innerHTML = `<span>${dangerIcon}</span><span>${dangerText}</span>`;
     
     // Puntos
-    const puntos = parseInt(data.puntos) || 50;
-    elements.resultPoints.textContent = puntos;
-    animatePoints(puntos);
+    const puntosGanados = parseInt(data.puntos) || 50;
+    elements.resultPoints.textContent = puntosGanados;
+    
+    // Actualizar puntos totales
+    updateTotalPoints(puntosGanados);
+    
+    // Animación de puntos del resultado
+    animateResultPoints(puntosGanados);
     
     // Mapa de distribución
     showDistributionMap(data.regiones || extractRegionsFromHabitat(data.habitat));
@@ -1034,9 +1055,9 @@ function dismissPWABanner() {
 }
 
 // ========================================
-// ANIMACIÓN DE PUNTOS
+// PUNTOS Y ANIMACIONES
 // ========================================
-function animatePoints(finalValue) {
+function animateResultPoints(finalValue) {
     let current = 0;
     const increment = Math.ceil(finalValue / 30);
     const interval = setInterval(() => {
@@ -1047,6 +1068,43 @@ function animatePoints(finalValue) {
         }
         elements.resultPoints.textContent = current;
     }, 30);
+}
+
+function updateTotalPoints(puntosNuevos) {
+    const previousTotal = state.totalPoints;
+    state.totalPoints += puntosNuevos;
+    
+    // Guardar en localStorage
+    localStorage.setItem('naturia-total-points', state.totalPoints);
+    
+    // Efecto visual pop en el badge
+    if (elements.totalPointsBadge) {
+        elements.totalPointsBadge.classList.remove('pop');
+        void elements.totalPointsBadge.offsetWidth; // Trigger reflow
+        elements.totalPointsBadge.classList.add('pop');
+    }
+    
+    // Animación numérica del total
+    animateTotalValue(previousTotal, state.totalPoints);
+}
+
+function animateTotalValue(start, end) {
+    let current = start;
+    const duration = 1000; // 1 segundo
+    const stepTime = 30;
+    const totalSteps = duration / stepTime;
+    const increment = Math.ceil((end - start) / totalSteps);
+    
+    const interval = setInterval(() => {
+        current += increment;
+        if (current >= end) {
+            current = end;
+            clearInterval(interval);
+        }
+        if (elements.pointsTotalValue) {
+            elements.pointsTotalValue.textContent = current;
+        }
+    }, stepTime);
 }
 
 // ========================================

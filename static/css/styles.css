@@ -143,6 +143,91 @@ body::before {
     margin-top: 5px;
 }
 
+/* Marcador Global de Puntos */
+.total-points-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    animation: bounceIn 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.total-points-badge {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: linear-gradient(135deg, var(--text-primary) 0%, #2c3e50 100%);
+    padding: 10px 25px;
+    border-radius: var(--border-radius-full);
+    border: 3px solid var(--color-accent);
+    box-shadow: 0 0 20px rgba(255, 217, 61, 0.3);
+    transition: all var(--transition-medium);
+}
+
+.total-points-badge .points-icon {
+    font-size: 1.8rem;
+    filter: drop-shadow(0 0 5px rgba(255, 217, 61, 0.5));
+}
+
+.total-points-badge .points-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.total-points-badge .points-label {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: var(--color-accent);
+    opacity: 0.9;
+}
+
+.total-points-badge .points-total-value {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--text-light);
+    line-height: 1;
+}
+
+.total-points-badge.pop {
+    animation: score-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes score-pop {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.15);
+        filter: brightness(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+
+    70% {
+        transform: scale(0.9);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
 /* Selector de Tipo */
 .type-selector {
     display: flex;
@@ -190,7 +275,8 @@ body::before {
 }
 
 .type-btn.active.animal {
-    border-color: #A0522D; /* Sienna */
+    border-color: #A0522D;
+    /* Sienna */
     background: linear-gradient(135deg, #A0522D 0%, #CD853F 100%);
 }
 
@@ -936,11 +1022,11 @@ button:focus-visible,
     --bg-gradient-start: #1a1a2e;
     --bg-gradient-end: #16213e;
     --bg-card: rgba(30, 30, 50, 0.95);
-    
+
     /* Colores de texto para tema oscuro */
     --text-primary: #E8E8E8;
     --text-secondary: #B0B0C0;
-    
+
     /* Ajustes de sombras para tema oscuro */
     --shadow-soft: 0 4px 15px rgba(0, 0, 0, 0.3);
     --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.4);
@@ -1515,21 +1601,21 @@ body,
         height: 45px;
         font-size: 1.3rem;
     }
-    
+
     .chile-map-container {
         flex-direction: column;
         align-items: center;
     }
-    
+
     .chile-map {
         width: 100px;
     }
-    
+
     .sound-player {
         flex-direction: column;
         text-align: center;
     }
-    
+
     .pwa-install-banner {
         left: 10px;
         right: 10px;
