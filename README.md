@@ -2,18 +2,23 @@
 
 Aplicación web educativa que identifica la biodiversidad chilena usando Inteligencia Artificial (Google Gemini).
 
+**🌐 Acceso en Vivo: [https://naturia.duckdns.org](https://naturia.duckdns.org)**
+
 ![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
 ![Flask](https://img.shields.io/badge/Flask-3.0+-green.svg)
 ![Gemini](https://img.shields.io/badge/Google-Gemini%20AI-orange.svg)
 ![PWA](https://img.shields.io/badge/PWA-Ready-success.svg)
+![SSL](https://img.shields.io/badge/SSL-Encrypted-brightgreen.svg)
 
 ## 🎯 Características
 
 - 🐛 **Identificación Multiespecie**: Reconoce insectos, plantas, aves y animales silvestres nativos de Chile.
+- 👤 **Perfiles de Usuario**: Crea tu cuenta para guardar progresos y personalizar tu experiencia.
+- 📔 **Mi Naturadex**: Colección personal de todos los descubrimientos realizados.
 - 🔊 **Canto y Sonidos**: Escucha los sonidos de aves e insectos (Integración con Xeno-Canto y Wikimedia).
 - 🗺️ **Mapa de Distribución**: Visualiza en qué regiones de Chile habita cada especie.
 - 🎤 **Búsqueda por Voz**: Usa el micrófono para buscar especies rápidamente.
-- 🎮 **Sistema de Puntos Premium**: Gana puntos por tus hallazgos. Incluye marcador global animado y persistente.
+- 🎮 **Sistema de Puntos Premium**: Gana puntos y sube de rango (desde Novato hasta Maestro).
 - 🌙 **Modo Oscuro**: Diseño adaptable para una mejor visualización.
 - 📱 **PWA (Progressive Web App)**: Instálala en tu móvil para un acceso rápido y uso optimizado.
 - ⚠️ **Indicador de Peligrosidad**: Información clara sobre si la especie representa un riesgo.
