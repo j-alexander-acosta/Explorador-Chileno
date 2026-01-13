@@ -533,7 +533,10 @@ async function performTextSearch() {
         try {
             data = await response.json();
         } catch (e) {
-            throw new Error('La respuesta del servidor no es válida.');
+            console.error('Error parseando JSON (Búsqueda):', e);
+            const text = await response.text();
+            console.error('Respuesta cruda del servidor:', text);
+            throw new Error('La respuesta del servidor no es válida (posible tiempo de espera agotado).');
         }
         
         if (!response.ok || data.error) {
@@ -587,7 +590,10 @@ async function analyzeImage() {
         try {
             data = await response.json();
         } catch (e) {
-            throw new Error('La respuesta del servidor no es válida.');
+            console.error('Error parseando JSON (Identificación):', e);
+            const text = await response.text();
+            console.error('Respuesta cruda del servidor:', text);
+            throw new Error('La respuesta del servidor no es válida (posible tiempo de espera agotado).');
         }
         
         if (!response.ok || data.error) {

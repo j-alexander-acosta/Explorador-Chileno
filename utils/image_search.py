@@ -38,7 +38,7 @@ def buscar_imagen_wikipedia(nombre_cientifico: str, nombre_comun: str = None) ->
                 f"{wiki_base}/w/api.php", 
                 params=image_params, 
                 headers=HEADERS,
-                timeout=10
+                timeout=5
             )
             
             if img_response.status_code != 200:
@@ -74,7 +74,7 @@ def buscar_imagen_wikipedia(nombre_cientifico: str, nombre_comun: str = None) ->
                 f"{wiki_base}/w/api.php", 
                 params=search_params, 
                 headers=HEADERS,
-                timeout=10
+                timeout=5
             )
             
             if response.status_code != 200:
