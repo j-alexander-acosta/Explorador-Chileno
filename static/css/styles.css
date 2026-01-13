@@ -5,55 +5,59 @@
 
 /* Variables CSS */
 :root {
-    /* Colores principales - Inspirados en la naturaleza chilena */
-    --color-primary: #2E8B57;
+    /* Colores primarios - HSL para mejor armonía */
+    --color-primary: hsl(145, 50%, 36%);
     /* Verde bosque */
-    --color-primary-light: #3CB371;
-    /* Verde medio */
-    --color-primary-dark: #1D5A3A;
-    /* Verde oscuro */
+    --color-primary-light: hsl(145, 50%, 46%);
+    --color-primary-dark: hsl(145, 50%, 20%);
 
-    --color-secondary: #FF6B35;
+    --color-secondary: hsl(16, 100%, 61%);
     /* Naranja cálido */
-    --color-secondary-light: #FF8C5A;
+    --color-secondary-light: hsl(16, 100%, 68%);
 
-    --color-accent: #FFD93D;
+    --color-accent: hsl(48, 100%, 62%);
     /* Amarillo sol */
-    --color-accent-light: #FFE566;
+    --color-accent-light: hsl(48, 100%, 70%);
 
     /* Colores de fondo */
-    --bg-gradient-start: #E8F5E9;
-    --bg-gradient-end: #C8E6C9;
-    --bg-card: rgba(255, 255, 255, 0.95);
+    --bg-gradient-start: hsl(128, 33%, 94%);
+    --bg-gradient-end: hsl(128, 33%, 85%);
+    --bg-card: hsla(0, 0%, 100%, 0.7);
+    /* Para glassmorphism */
+    --glass-border: hsla(0, 0%, 100%, 0.4);
 
     /* Colores de texto */
-    --text-primary: #1A1A2E;
-    --text-secondary: #4A4A6A;
-    --text-light: #FFFFFF;
+    --text-primary: hsl(240, 30%, 15%);
+    --text-secondary: hsl(240, 20%, 35%);
+    --text-light: hsl(0, 0%, 100%);
 
     /* Colores de estado */
-    --color-success: #4CAF50;
-    --color-warning: #FFC107;
-    --color-danger: #E53935;
-    --color-info: #2196F3;
+    --color-success: hsl(122, 39%, 49%);
+    --color-warning: hsl(45, 100%, 51%);
+    --color-danger: hsl(1, 77%, 55%);
+    --color-info: hsl(207, 90%, 54%);
 
-    /* Sombras */
-    --shadow-soft: 0 4px 15px rgba(0, 0, 0, 0.1);
-    --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.15);
-    --shadow-strong: 0 15px 50px rgba(0, 0, 0, 0.2);
+    /* Conservación */
+    --color-extinct: #2c3e50;
+    --color-endangered: #e74c3c;
+    --color-vulnerable: #e67e22;
+    --color-least-concern: #27ae60;
+
+    /* Sombras Glass */
+    --shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    --shadow-medium: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    --shadow-strong: 0 12px 40px 0 rgba(31, 38, 135, 0.25);
 
     /* Bordes */
     --border-radius-sm: 12px;
     --border-radius-md: 20px;
     --border-radius-lg: 30px;
-    --border-radius-full: 50%;
+    --border-radius-full: 999px;
 
     /* Transiciones */
-    --transition-fast: 0.2s ease;
-    --transition-medium: 0.3s ease;
-    --transition-slow: 0.5s ease;
+    --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-medium: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
-    /* Fuentes */
     --font-family: 'Nunito', 'Segoe UI', sans-serif;
     --font-size-base: 16px;
 }
@@ -610,10 +614,72 @@ body::before {
 
 .result-card {
     background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
     border-radius: var(--border-radius-md);
     padding: 30px;
     box-shadow: var(--shadow-strong);
     overflow: hidden;
+    transition: transform var(--transition-medium);
+}
+
+.result-card:hover {
+    transform: translateY(-5px);
+}
+
+.result-badges {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.badge-section {
+    padding: 15px !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.badge-section h3 {
+    margin-bottom: 8px !important;
+    font-size: 0.9rem !important;
+}
+
+.conservation-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 15px;
+    border-radius: var(--border-radius-full);
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.conservation-tag.extinto {
+    background-color: var(--color-extinct);
+}
+
+.conservation-tag.peligro {
+    background-color: var(--color-endangered);
+}
+
+.conservation-tag.vulnerable {
+    background-color: var(--color-vulnerable);
+}
+
+.conservation-tag.preocupacion {
+    background-color: var(--color-least-concern);
+}
+
+.conservation-tag.normal {
+    background-color: var(--color-info);
 }
 
 /* Imagen de la especie */
@@ -783,6 +849,21 @@ body::before {
 
 .error-container.active {
     display: block;
+}
+
+/* Modo Información (No Error) */
+.error-container.info-mode {
+    background: rgba(33, 150, 243, 0.1);
+    border: 2px solid var(--color-primary);
+    animation: slideInUp 0.5s ease;
+}
+
+.error-container.info-mode h3 {
+    color: var(--color-primary-dark);
+}
+
+.error-container.info-mode .error-icon {
+    filter: none;
 }
 
 .error-icon {
@@ -1658,6 +1739,7 @@ body,
         bottom: 10px;
     }
 }
+
 /* ========================================
    MODAL DE USUARIO
    ======================================== */
@@ -1870,6 +1952,7 @@ body,
         opacity: 0;
         transform: translateY(50px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1883,4 +1966,78 @@ body,
         padding: 8px 15px;
         font-size: 0.9rem;
     }
+}
+
+/* Rank Progress Bar */
+.rank-progress-container {
+    margin-top: 25px;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: var(--border-radius-md);
+}
+
+.dark-theme .rank-progress-container {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.rank-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.next-rank-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.next-rank-label strong {
+    color: var(--color-primary);
+}
+
+.points-needed {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--color-primary);
+}
+
+.rank-progress-bar-bg {
+    width: 100%;
+    height: 12px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius-full);
+    overflow: hidden;
+}
+
+.dark-theme .rank-progress-bar-bg {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.rank-progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+    border-radius: var(--border-radius-full);
+    transition: width 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 0 10px rgba(46, 139, 87, 0.3);
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-gradient-start);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-primary-light);
+    border-radius: 10px;
+    border: 3px solid var(--bg-gradient-start);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary);
 }

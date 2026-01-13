@@ -259,7 +259,8 @@ def analizar():
         
         # Verificar si hubo error
         if 'error' in resultado:
-            return jsonify(resultado), 200  # Devolvemos 200 porque el error es del contenido, no del servidor
+            status_code = 400 if resultado.get('codigo_error') in ['QUOTA_EXCEEDED', 'API_KEY_ERROR'] else 200
+            return jsonify(resultado), status_code
         
         # Buscar imagen de la especie identificada
         imagen_url = obtener_imagen_especie(
@@ -307,14 +308,18 @@ def buscar():
         # Buscar con Gemini
         resultado = buscar_por_texto(consulta, tipo)
         
-        # Si no hay error, buscar imagen
-        if 'error' not in resultado:
-            imagen_url = obtener_imagen_especie(
-                resultado.get('cientifico', ''),
-                resultado.get('nombre', ''),
-                tipo
-            )
-            resultado['imagen_url'] = imagen_url
+        # Verificar si hubo error
+        if 'error' in resultado:
+            status_code = 400 if resultado.get('codigo_error') in ['QUOTA_EXCEEDED', 'API_KEY_ERROR'] else 200
+            return jsonify(resultado), status_code
+            
+        # Buscar imagen
+        imagen_url = obtener_imagen_especie(
+            resultado.get('cientifico', ''),
+            resultado.get('nombre', ''),
+            tipo
+        )
+        resultado['imagen_url'] = imagen_url
         
         return jsonify(resultado), 200
         

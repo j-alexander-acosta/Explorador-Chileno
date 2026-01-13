@@ -163,8 +163,8 @@
         
         <!-- Error -->
         <div class="error-container" id="error-container">
-            <div class="error-icon">😕</div>
-            <h3>¡Ups! Algo salió mal</h3>
+            <div class="error-icon" id="error-icon">😕</div>
+            <h3 id="error-title">¡Ups! Algo salió mal</h3>
             <p id="error-message">No pudimos analizar la imagen.</p>
             <button class="new-search-btn" id="error-retry-btn">
                 <span>🔄</span>
@@ -241,12 +241,20 @@
                         <p id="result-curiosity">Dato curioso...</p>
                     </div>
                     
-                    <!-- Peligrosidad -->
-                    <div class="result-section">
-                        <h3><span>⚠️</span> ¿Es peligroso?</h3>
-                        <div class="danger-indicator baja" id="result-danger">
-                            <span>✅</span>
-                            <span>Peligrosidad Baja</span>
+                    <!-- Peligrosidad y Estado de Conservación -->
+                    <div class="result-badges">
+                        <div class="result-section badge-section">
+                            <h3><span>⚠️</span> Peligrosidad</h3>
+                            <div class="danger-indicator baja" id="result-danger">
+                                <span>✅</span>
+                                <span>Baja</span>
+                            </div>
+                        </div>
+                        <div class="result-section badge-section">
+                            <h3><span>🛡️</span> Conservación</h3>
+                            <div class="conservation-tag" id="result-conservation">
+                                <span>Preocupación Menor</span>
+                            </div>
                         </div>
                     </div>
                     
@@ -350,6 +358,16 @@
                     <div class="stat-card">
                         <span class="stat-value" id="profile-discoveries">0</span>
                         <span class="stat-label">Hallazgos</span>
+                    </div>
+                </div>
+
+                <div class="rank-progress-container">
+                    <div class="rank-progress-header">
+                        <span class="next-rank-label">Próximo Rango: <strong id="next-rank-name">...</strong></span>
+                        <span class="points-needed" id="points-needed-label">0 / 0</span>
+                    </div>
+                    <div class="rank-progress-bar-bg">
+                        <div class="rank-progress-bar-fill" id="rank-progress-bar-fill"></div>
                     </div>
                 </div>
                 

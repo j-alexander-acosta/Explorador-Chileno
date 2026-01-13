@@ -13,10 +13,11 @@ import io
 
 # Lista de modelos a probar (en orden de preferencia)
 MODELOS_DISPONIBLES = [
-    'gemini-flash-latest',
-    'gemini-2.0-flash',
     'gemini-2.5-flash',
+    'gemini-2.0-flash',
+    'gemini-flash-latest',
     'gemini-pro-latest',
+    'gemini-1.5-flash',
 ]
 
 # Configurar la API de Gemini
@@ -34,68 +35,68 @@ def obtener_prompt(tipo: str) -> str:
         return """Eres un experto entomólogo chileno especializado en insectos de Chile. 
         Analiza la imagen y devuelve ÚNICAMENTE un objeto JSON válido con esta estructura exacta:
         {
-            "nombre": "Nombre común en Chile (si tiene varios, usa el más conocido)",
+            "nombre": "Nombre común en Chile (pueden ser insectos, arácnidos o pequeños bichos urbanos/domésticos)",
             "cientifico": "Nombre científico en latín",
             "descripcion": "Explicación divertida y educativa para niños de 8 años, máximo 3 oraciones",
-            "habitat": "Dónde vive en Chile (regiones o zonas)",
+            "habitat": "Dónde se encuentra comúnmente (hogares, jardines, naturaleza)",
             "peligrosidad": "Baja/Media/Alta",
-            "dato_curioso": "Un dato sorprendente sobre este insecto",
-            "puntos": un número entero entre 10 y 100 basado en la rareza del insecto en Chile
+            "estado_conservacion": "Extinto/En Peligro/Vulnerable/Preocupación Menor/No Evaluado/Domesticado",
+            "dato_curioso": "Un dato sorprendente sobre este espécimen",
+            "puntos": un número entero entre 10 y 100 basado en la rareza en Chile
         }
         
-        Si no puedes identificar un insecto en la imagen, devuelve:
-        {"error": "No pude identificar un insecto en esta imagen. ¡Intenta con otra foto!"}
+        Si no hay absolutamente nada identificable en la imagen, devuelve un objeto JSON con una clave "error" y una explicación breve.
         
         IMPORTANTE: Responde SOLO con el JSON, sin texto adicional ni markdown."""
     elif tipo == "ave":
         return """Eres un experto ornitólogo chileno especializado en aves de Chile.
         Analiza la imagen y devuelve ÚNICAMENTE un objeto JSON válido con esta estructura exacta:
         {
-            "nombre": "Nombre común en Chile",
+            "nombre": "Nombre común en Chile (incluyendo aves domésticas o de granja)",
             "cientifico": "Nombre científico en latín",
             "descripcion": "Explicación divertida y educativa para niños de 8 años, máximo 3 oraciones",
-            "habitat": "Dónde vive en Chile (regiones o zonas)",
+            "habitat": "Dónde vive o se encuentra (plazas, granjas, naturaleza)",
             "peligrosidad": "Baja/Media/Alta",
+            "estado_conservacion": "Extinto/En Peligro/Vulnerable/Preocupación Menor/No Evaluado/Domesticado",
             "dato_curioso": "Un dato sorprendente sobre esta ave",
-            "puntos": un número entero entre 10 y 100 basado en la rareza del ave en Chile
+            "puntos": un número entero entre 10 y 100 basado en la rareza en Chile
         }
         
-        Si no puedes identificar un ave en la imagen, devuelve:
-        {"error": "No pude identificar un ave en esta imagen. ¡Intenta con otra foto!"}
+        Si no hay absolutamente nada identificable en la imagen, devuelve un objeto JSON con una clave "error" y una explicación breve.
         
         IMPORTANTE: Responde SOLO con el JSON, sin texto adicional ni markdown."""
     elif tipo == "animal":
         return """Eres un experto zoólogo chileno especializado en fauna silvestre de Chile (mamíferos, reptiles, etc.).
         Analiza la imagen y devuelve ÚNICAMENTE un objeto JSON válido con esta estructura exacta:
         {
-            "nombre": "Nombre común en Chile",
+            "nombre": "Nombre común en Chile (incluyendo mascotas y animales domésticos)",
             "cientifico": "Nombre científico en latín",
             "descripcion": "Explicación divertida y educativa para niños de 8 años, máximo 3 oraciones",
-            "habitat": "Dónde vive en Chile (regiones o zonas)",
+            "habitat": "Dónde se encuentra (hogares, campos, naturaleza)",
             "peligrosidad": "Baja/Media/Alta",
+            "estado_conservacion": "Extinto/En Peligro/Vulnerable/Preocupación Menor/No Evaluado/Domesticado",
             "dato_curioso": "Un dato sorprendente sobre este animal",
-            "puntos": un número entero entre 10 y 100 basado en la rareza del animal en Chile
+            "puntos": un número entero entre 10 y 100 basado en la rareza en Chile
         }
         
-        Si no puedes identificar un animal silvestre chileno en la imagen, devuelve:
-        {"error": "No pude identificar un animal silvestre chileno en esta imagen. ¡Intenta con otra foto!"}
+        Si no hay absolutamente nada identificable en la imagen, devuelve un objeto JSON con una clave "error" y una explicación breve.
         
         IMPORTANTE: Responde SOLO con el JSON, sin texto adicional ni markdown."""
     else:
         return """Eres un experto botánico chileno especializado en flora nativa de Chile.
         Analiza la imagen y devuelve ÚNICAMENTE un objeto JSON válido con esta estructura exacta:
         {
-            "nombre": "Nombre común en Chile",
+            "nombre": "Nombre común en Chile (incluyendo plantas de jardín y cultivos)",
             "cientifico": "Nombre científico en latín",
             "descripcion": "Explicación divertida y educativa para niños de 8 años, máximo 3 oraciones",
-            "habitat": "Dónde crece en Chile (regiones o zonas)",
+            "habitat": "Dónde crece (jardines, maceteros, campos, naturaleza)",
             "peligrosidad": "Baja/Media/Alta (si es venenosa o peligrosa)",
+            "estado_conservacion": "Extinto/En Peligro/Vulnerable/Preocupación Menor/No Evaluado/Cultivada",
             "dato_curioso": "Un dato sorprendente sobre esta planta",
-            "puntos": un número entero entre 10 y 100 basado en la rareza de la planta en Chile
+            "puntos": un número entero entre 10 y 100 basado en la rareza en Chile
         }
         
-        Si no puedes identificar una planta en la imagen, devuelve:
-        {"error": "No pude identificar una planta en esta imagen. ¡Intenta con otra foto!"}
+        Si no hay absolutamente nada identificable en la imagen, devuelve un objeto JSON con una clave "error" y una explicación breve.
         
         IMPORTANTE: Responde SOLO con el JSON, sin texto adicional ni markdown."""
 
@@ -113,6 +114,9 @@ def intentar_con_modelo(model_name: str, prompt: str, image) -> tuple:
         # Verificar si es error de cuota
         if "429" in error_str or "quota" in error_str.lower():
             return (False, f"quota_exceeded:{model_name}")
+        # Verificar si la API key es inválida o expiró
+        if "400" in error_str or "API_KEY_INVALID" in error_str or "expired" in error_str.lower():
+            return (False, f"key_error:{model_name}")
         # Verificar si el modelo no existe
         if "404" in error_str or "not found" in error_str.lower():
             return (False, f"model_not_found:{model_name}")
@@ -169,6 +173,7 @@ def analizar_imagen(image_data: bytes, tipo: str = "insecto") -> dict:
                 elif "model_not_found" in resultado:
                     continue  # Silenciosamente probar el siguiente modelo
                 else:
+                    print(f"❌ Error con {modelo}: {resultado}")
                     errores.append(f"{modelo}: {resultado}")
         
         # Si todos los modelos fallaron por cuota
@@ -179,6 +184,14 @@ def analizar_imagen(image_data: bytes, tipo: str = "insecto") -> dict:
                 "codigo_error": "QUOTA_EXCEEDED"
             }
         
+        # Revisar si hubo errores de API Key
+        if errores and any("key_error" in err for err in errores):
+             return {
+                "error": "🔑 Tu API Key de Google Gemini parece haber expirado o es inválida. Por favor, genera una nueva en https://aistudio.google.com/app/apikey y actualiza el archivo .env",
+                "tipo": tipo,
+                "codigo_error": "API_KEY_ERROR"
+            }
+
         # Si hubo otros errores
         if errores:
             return {
@@ -216,6 +229,7 @@ def obtener_prompt_busqueda(tipo: str, consulta: str) -> str:
             "descripcion": "Explicación divertida y educativa para niños de 8 años, máximo 3 oraciones",
             "habitat": "Dónde vive en Chile (regiones o zonas)",
             "peligrosidad": "Baja/Media/Alta",
+            "estado_conservacion": "Extinto/En Peligro/Vulnerable/Preocupación Menor/No Evaluado",
             "dato_curioso": "Un dato sorprendente sobre este insecto",
             "puntos": un número entero entre 10 y 100 basado en la rareza del insecto en Chile,
             "imagen_sugerida": "Una descripción breve para buscar una imagen del insecto"
@@ -236,6 +250,7 @@ def obtener_prompt_busqueda(tipo: str, consulta: str) -> str:
             "descripcion": "Explicación divertida y educativa para niños de 8 años, máximo 3 oraciones",
             "habitat": "Dónde vive en Chile (regiones o zonas)",
             "peligrosidad": "Baja/Media/Alta",
+            "estado_conservacion": "Extinto/En Peligro/Vulnerable/Preocupación Menor/No Evaluado",
             "dato_curioso": "Un dato sorprendente sobre esta ave",
             "puntos": un número entero entre 10 y 100 basado en la rareza del ave en Chile,
             "imagen_sugerida": "Una descripción breve para buscar una imagen del ave"
@@ -256,6 +271,7 @@ def obtener_prompt_busqueda(tipo: str, consulta: str) -> str:
             "descripcion": "Explicación divertida y educativa para niños de 8 años, máximo 3 oraciones",
             "habitat": "Dónde vive en Chile (regiones o zonas)",
             "peligrosidad": "Baja/Media/Alta",
+            "estado_conservacion": "Extinto/En Peligro/Vulnerable/Preocupación Menor/No Evaluado",
             "dato_curioso": "Un dato sorprendente sobre este animal",
             "puntos": un número entero entre 10 y 100 basado en la rareza del animal en Chile,
             "imagen_sugerida": "Una descripción breve para buscar una imagen del animal"
@@ -276,6 +292,7 @@ def obtener_prompt_busqueda(tipo: str, consulta: str) -> str:
             "descripcion": "Explicación divertida y educativa para niños de 8 años, máximo 3 oraciones",
             "habitat": "Dónde crece en Chile (regiones o zonas)",
             "peligrosidad": "Baja/Media/Alta (si es venenosa o peligrosa)",
+            "estado_conservacion": "Extinto/En Peligro/Vulnerable/Preocupación Menor/No Evaluado",
             "dato_curioso": "Un dato sorprendente sobre esta planta",
             "puntos": un número entero entre 10 y 100 basado en la rareza de la planta en Chile,
             "imagen_sugerida": "Una descripción breve para buscar una imagen de la planta"
@@ -300,6 +317,8 @@ def intentar_busqueda_con_modelo(model_name: str, prompt: str) -> tuple:
         error_str = str(e)
         if "429" in error_str or "quota" in error_str.lower():
             return (False, f"quota_exceeded:{model_name}")
+        if "400" in error_str or "API_KEY_INVALID" in error_str or "expired" in error_str.lower():
+            return (False, f"key_error:{model_name}")
         if "404" in error_str or "not found" in error_str.lower():
             return (False, f"model_not_found:{model_name}")
         return (False, error_str)
@@ -361,6 +380,14 @@ def buscar_por_texto(consulta: str, tipo: str = "insecto") -> dict:
                 "error": "⏰ ¡Has usado todas las consultas gratuitas de hoy! Intenta mañana.",
                 "tipo": tipo,
                 "codigo_error": "QUOTA_EXCEEDED"
+            }
+        
+        # Revisar si hubo errores de API Key
+        if errores and any("key_error" in err for err in errores):
+             return {
+                "error": "🔑 Tu API Key de Google Gemini parece haber expirado o es inválida. Por favor, genera una nueva en https://aistudio.google.com/app/apikey y actualiza el archivo .env",
+                "tipo": tipo,
+                "codigo_error": "API_KEY_ERROR"
             }
         
         if errores:

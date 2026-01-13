@@ -73,6 +73,8 @@ const elements = {
     // Error
     errorContainer: document.getElementById('error-container'),
     errorMessage: document.getElementById('error-message'),
+    errorIcon: document.getElementById('error-icon'),
+    errorTitle: document.getElementById('error-title'),
     errorRetryBtn: document.getElementById('error-retry-btn'),
     
     // Resultados
@@ -87,6 +89,7 @@ const elements = {
     resultCuriosity: document.getElementById('result-curiosity'),
     resultDanger: document.getElementById('result-danger'),
     resultPoints: document.getElementById('result-points'),
+    resultConservation: document.getElementById('result-conservation'),
     newSearchBtn: document.getElementById('new-search-btn'),
     
     // Mapa
@@ -129,7 +132,11 @@ const elements = {
     profileEmail: document.getElementById('profile-email'),
     profilePoints: document.getElementById('profile-points'),
     profileDiscoveries: document.getElementById('profile-discoveries'),
-    profileRank: document.getElementById('profile-rank')
+    profileRank: document.getElementById('profile-rank'),
+    // Rank Progress
+    nextRankName: document.getElementById('next-rank-name'),
+    pointsNeededLabel: document.getElementById('points-needed-label'),
+    rankProgressBarFill: document.getElementById('rank-progress-bar-fill')
 };
 
 // ========================================
@@ -522,17 +529,31 @@ async function performTextSearch() {
             })
         });
         
-        const data = await response.json();
+        let data;
+        try {
+            data = await response.json();
+        } catch (e) {
+            throw new Error('La respuesta del servidor no es válida.');
+        }
         
-        if (data.error) {
-            showError(data.error);
+        if (!response.ok || data.error) {
+            const errorMsg = data.error || `Error del servidor (${response.status})`;
+            if (response.ok && data.error) {
+                showInfo(errorMsg, 'Información');
+            } else {
+                showError(errorMsg);
+            }
         } else {
             showResults(data);
             saveToHistory(data);
         }
     } catch (error) {
         console.error('Error en búsqueda:', error);
-        showError('¡Ups! No pude conectar con el servidor. ¿Tienes internet?');
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            showError('¡Ups! No hay conexión a internet. Revisa tu red e intenta de nuevo.');
+        } else {
+            showError(`¡Algo salió mal! ${error.message}`);
+        }
     } finally {
         state.isAnalyzing = false;
     }
@@ -562,17 +583,31 @@ async function analyzeImage() {
             body: formData
         });
         
-        const data = await response.json();
+        let data;
+        try {
+            data = await response.json();
+        } catch (e) {
+            throw new Error('La respuesta del servidor no es válida.');
+        }
         
-        if (data.error) {
-            showError(data.error);
+        if (!response.ok || data.error) {
+            const errorMsg = data.error || `Error del servidor (${response.status})`;
+            if (response.ok && data.error) {
+                showInfo(errorMsg, 'Información');
+            } else {
+                showError(errorMsg);
+            }
         } else {
             showResults(data);
             saveToHistory(data);
         }
     } catch (error) {
         console.error('Error al analizar:', error);
-        showError('¡Ups! No pude conectar con el servidor. ¿Tienes internet?');
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            showError('¡Ups! No hay conexión a internet. Revisa tu red e intenta de nuevo.');
+        } else {
+            showError(`¡Algo salió mal! ${error.message}`);
+        }
     } finally {
         state.isAnalyzing = false;
     }
@@ -646,6 +681,9 @@ function showResults(data) {
     if (state.isLoggedIn) {
         saveDiscoveryToServer(data);
     }
+    
+    // Conservación
+    showConservationStatus(data.estado_conservacion);
     
     // Mapa de distribución
     showDistributionMap(data.regiones || extractRegionsFromHabitat(data.habitat));
@@ -1208,6 +1246,17 @@ function resetSearch() {
 // MANEJO DE ERRORES Y SECCIONES
 // ========================================
 function showError(message) {
+    if (elements.errorIcon) elements.errorIcon.textContent = '😕';
+    if (elements.errorTitle) elements.errorTitle.textContent = '¡Ups! Algo salió mal';
+    elements.errorContainer.classList.remove('info-mode');
+    elements.errorMessage.textContent = message;
+    showSection('error');
+}
+
+function showInfo(message, title = '¡Nota del Experto!') {
+    if (elements.errorIcon) elements.errorIcon.textContent = '💡';
+    if (elements.errorTitle) elements.errorTitle.textContent = title;
+    elements.errorContainer.classList.add('info-mode');
     elements.errorMessage.textContent = message;
     showSection('error');
 }
@@ -1219,6 +1268,11 @@ function showSection(section) {
     elements.loaderContainer.classList.remove('active');
     elements.errorContainer.classList.remove('active');
     elements.resultContainer.classList.remove('active');
+    
+    // Reset info mode unless we are shown info
+    if (section !== 'error') {
+        elements.errorContainer.classList.remove('info-mode');
+    }
     
     switch (section) {
         case 'upload':
@@ -1401,8 +1455,15 @@ function updateAuthUI() {
         elements.profilePoints.textContent = state.totalPoints;
         elements.profileDiscoveries.textContent = state.user.descubrimientos_count || 0;
         
-        // Calcular Rango
-        elements.profileRank.textContent = getExplorerRank(state.totalPoints);
+        // Calcular Rango y Progreso
+        const rankInfo = getExplorerRankInfo(state.totalPoints);
+        elements.profileRank.textContent = rankInfo.currentRank;
+        
+        if (elements.nextRankName && elements.pointsNeededLabel && elements.rankProgressBarFill) {
+            elements.nextRankName.textContent = rankInfo.nextRank;
+            elements.pointsNeededLabel.textContent = `${state.totalPoints} / ${rankInfo.nextRankPoints}`;
+            elements.rankProgressBarFill.style.width = `${rankInfo.progress}%`;
+        }
     } else {
         elements.userNameLabel.textContent = 'Ingresar';
         elements.userBtnToggle.classList.remove('logged-in');
@@ -1412,11 +1473,65 @@ function updateAuthUI() {
     }
 }
 
-function getExplorerRank(points) {
-    if (points < 500) return 'Explorador Novato 🌿';
-    if (points < 1500) return 'Rastreador de Huellas 🐾';
-    if (points < 3000) return 'Observador Senior 🔭';
-    if (points < 6000) return 'Guardián del Bosque 🌲';
-    return 'Maestro de la Naturaleza 👑';
+function getExplorerRankInfo(points) {
+    const ranks = [
+        { name: 'Explorador Novato 🌿', threshold: 0 },
+        { name: 'Rastreador de Huellas 🐾', threshold: 500 },
+        { name: 'Observador Senior 🔭', threshold: 1500 },
+        { name: 'Guardián del Bosque 🌲', threshold: 3000 },
+        { name: 'Maestro de la Naturaleza 👑', threshold: 6000 },
+        { name: 'Leyenda de la Biodiversidad 🏆', threshold: 12000 }
+    ];
+
+    let currentRankIndex = 0;
+    for (let i = ranks.length - 1; i >= 0; i--) {
+        if (points >= ranks[i].threshold) {
+            currentRankIndex = i;
+            break;
+        }
+    }
+
+    const currentRank = ranks[currentRankIndex].name;
+    const nextRankIndex = Math.min(currentRankIndex + 1, ranks.length - 1);
+    const nextRank = ranks[nextRankIndex].name;
+    const nextRankPoints = ranks[nextRankIndex].threshold;
+    
+    let progress = 0;
+    if (currentRankIndex < ranks.length - 1) {
+        const currentThreshold = ranks[currentRankIndex].threshold;
+        const range = nextRankPoints - currentThreshold;
+        const progressInRange = points - currentThreshold;
+        progress = Math.min(Math.floor((progressInRange / range) * 100), 100);
+    } else {
+        progress = 100;
+    }
+
+    return {
+        currentRank,
+        nextRank,
+        nextRankPoints,
+        progress
+    };
+}
+
+function showConservationStatus(status) {
+    if (!elements.resultConservation) return;
+    
+    const conservation = (status || 'No Evaluado').toLowerCase();
+    let cssClass = 'normal';
+    let text = status || 'No Evaluado';
+
+    if (conservation.includes('extinto')) {
+        cssClass = 'extinto';
+    } else if (conservation.includes('peligro')) {
+        cssClass = 'peligro';
+    } else if (conservation.includes('vulnerable')) {
+        cssClass = 'vulnerable';
+    } else if (conservation.includes('preocupacion')) {
+        cssClass = 'preocupacion';
+    }
+
+    elements.resultConservation.className = `conservation-tag ${cssClass}`;
+    elements.resultConservation.textContent = text;
 }
 document.addEventListener('DOMContentLoaded', init);
